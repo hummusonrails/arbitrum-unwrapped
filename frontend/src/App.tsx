@@ -125,7 +125,7 @@ export default function App() {
   }, [isMintSuccess, receipt, pendingStory, insights]);
 
   const shareToFarcaster = () => {
-    const appUrl = "https://farcaster.xyz/miniapps/9ehldX_kietX/arbitrum-unwrapped-2025";
+    const appUrl = "https://farcaster.xyz/miniapps/8idfqZvCXlsG/arbitrum-unwrapped";
     const text = mintedStory
       ? `Minted my Arbitrum Unwrapped 2025 story: ${mintedStory}\n${appUrl}`
       : `Arbitrum Unwrapped 2025 is live. Generate your year onchain + mint it.\n${appUrl}`;
