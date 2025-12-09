@@ -148,7 +148,10 @@ export default function App() {
 
   const shareToFarcaster = () => {
     const text = buildShareText();
-    const imageEmbed = shareImage;
+    const imageEmbed =
+      shareImage && typeof window !== "undefined"
+        ? new URL(shareImage, window.location.origin).toString()
+        : null;
 
     sdk.actions.composeCast({
       text,
@@ -439,6 +442,15 @@ export default function App() {
                           ))}
                       </select>
                       <p className="text-xs text-slate-200">Attach one storybook image embed in your message.</p>
+                      {shareImage && (
+                        <div className="mt-2 flex items-center justify-center rounded-lg border border-white/10 bg-black/20 px-2 py-2">
+                          <img
+                            src={shareImage}
+                            alt="Selected storybook preview"
+                            className="h-16 w-16 rounded-md object-cover"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
