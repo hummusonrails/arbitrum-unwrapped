@@ -415,7 +415,7 @@ export default function App() {
                           Story stats
                         </button>
                       </div>
-                      <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-slate-200 whitespace-pre-line">
+                      <div className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-slate-200 whitespace-pre-wrap break-words">
                         {sharePreview}
                       </div>
                     </div>
