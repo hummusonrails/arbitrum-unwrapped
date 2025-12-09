@@ -7,7 +7,7 @@ import ArbitrumUnwrappedAbi from "./abi/ArbitrumUnwrapped.json";
 import { type Insights, fetchInsights } from "./utils/unwrappedInsights";
 
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS as `0x${string}`;
-const MINT_PRICE_WEI = 6000000000000n; // ~0.000006 ETH
+const MINT_PRICE_WEI = 15000000000000n; // ~0.000015 ETH (~$0.05)
 
 export default function App() {
   const { isConnected, address } = useAccount();
@@ -128,11 +128,11 @@ export default function App() {
     const appUrl = "https://farcaster.xyz/miniapps/8idfqZvCXlsG/arbitrum-unwrapped";
     const imageUrl = "https://arbitrum-unwrapped.onrender.com/unwrapped.png";
     const text = mintedStory
-      ? `Minted my Arbitrum Unwrapped 2025 story\n\n${appUrl}`
+      ? `Minted my Arbitrum Unwrapped 2025 story. ✨\n\nGenerate your year onchain + mint it. 🎊\n\n${appUrl}`
       : `Arbitrum Unwrapped 2025 is live. Generate your year onchain + mint it.\n${appUrl}`;
     sdk.actions.composeCast({
       text,
-      embeds: [imageUrl, appUrl],
+      embeds: [],
     });
   };
 

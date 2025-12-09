@@ -13,8 +13,8 @@ contract ArbitrumUnwrapped2025 is ERC721 {
 
     event StoryMinted(address indexed minter, uint256 indexed tokenId, string storyText);
 
-    // Mint price: ~$0.02 in ETH (creator fee)
-    uint256 public constant MINT_PRICE = 0.000006 ether;
+    // Mint price: ~$0.05 in ETH (creator fee)
+    uint256 public constant MINT_PRICE = 0.000015 ether;
 
     // Address receiving creator fees.
     address public immutable creator;
