@@ -29,6 +29,7 @@ export default function App() {
   const [mintError, setMintError] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [shareMode, setShareMode] = useState<"mint" | "story">("mint");
+  const [shareImage, setShareImage] = useState<string | null>(null);
 
   useEffect(() => {
     sdk.actions.ready();
@@ -125,11 +126,11 @@ export default function App() {
     setMintedTokenId(tokenId);
   }, [isMintSuccess, receipt, pendingStory, insights]);
 
-  const shareToFarcaster = () => {
+  const buildShareText = () => {
     const appUrl = "https://farcaster.xyz/miniapps/8idfqZvCXlsG/arbitrum-unwrapped";
     const defaultMintText = mintedStory
-      ? `Minted my Arbitrum Unwrapped 2025 story. ✨\n\n${mintedStory}\n\n${appUrl}`
-      : `Arbitrum Unwrapped 2025 is live. Generate your year onchain + mint it.\n\n${appUrl}`;
+      ? `Minted my Arbitrum Unwrapped 2025 story. ✨\n\n${mintedStory}`
+      : `Arbitrum Unwrapped 2025 is live. Generate your year onchain + mint it.`;
 
     const storyText =
       insights && shareMode === "story"
@@ -142,13 +143,19 @@ export default function App() {
           ].join("\n")
         : defaultMintText;
 
-    const text = `${shareMode === "story" ? storyText : defaultMintText}\n\n${appUrl}`;
+    return `${shareMode === "story" ? storyText : defaultMintText}\n\n${appUrl}`;
+  };
+
+  const shareToFarcaster = () => {
+    const text = buildShareText();
+    const imageEmbed = shareImage;
 
     sdk.actions.composeCast({
       text,
-      embeds: [],
+      embeds: imageEmbed ? [imageEmbed] : [],
     });
   };
+  const sharePreview = buildShareText();
 
   const truncatedAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
   const isMinting = isWritePending || isConfirming;
@@ -336,7 +343,7 @@ export default function App() {
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-4">
               {storySlides[currentSlide]?.cta === "connect" && !isConnected && (
                 <button
                   className="rounded-full bg-gradient-to-r from-[#34d8ff] via-[#3b82f6] to-[#a855f7] px-5 py-3 text-sm font-semibold text-white shadow-[0_15px_60px_rgba(0,0,0,0.35)] transition hover:translate-y-[-1px] hover:shadow-[0_18px_70px_rgba(0,0,0,0.45)] disabled:opacity-60"
@@ -347,65 +354,94 @@ export default function App() {
                 </button>
               )}
               {storySlides[currentSlide]?.id === "mint" && (
-                <>
-                  <button
-                    className="rounded-full bg-gradient-to-r from-[#34d8ff] via-[#3b82f6] to-[#a855f7] px-5 py-3 text-sm font-semibold text-white shadow-[0_15px_70px_rgba(0,0,0,0.45)] transition hover:translate-y-[-2px] hover:shadow-[0_18px_90px_rgba(0,0,0,0.55)] disabled:cursor-not-allowed disabled:opacity-60"
-                    onClick={handleMint}
-                    disabled={isMinting || !insights || isLoadingInsights}
-                  >
-                    {isConnected
-                      ? isLoadingInsights
-                        ? "Loading onchain insights..."
-                        : insights
-                          ? "Mint my Arbitrum Unwrapped"
-                          : "Generate and mint"
-                      : "Connect to mint"}
-                  </button>
-                  <div className="flex flex-wrap gap-2 text-xs text-slate-200">
-                    <span className="text-[11px] uppercase tracking-[0.2em] text-cyan-200">Share style</span>
-                    <div className="flex gap-2">
+                <div className="flex w-full flex-col gap-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      className="rounded-full bg-gradient-to-r from-[#34d8ff] via-[#3b82f6] to-[#a855f7] px-5 py-3 text-sm font-semibold text-white shadow-[0_15px_70px_rgba(0,0,0,0.45)] transition hover:translate-y-[-2px] hover:shadow-[0_18px_90px_rgba(0,0,0,0.55)] disabled:cursor-not-allowed disabled:opacity-60"
+                      onClick={handleMint}
+                      disabled={isMinting || !insights || isLoadingInsights}
+                    >
+                      {isConnected
+                        ? isLoadingInsights
+                          ? "Loading onchain insights..."
+                          : insights
+                            ? "Mint my Arbitrum Unwrapped"
+                            : "Generate and mint"
+                        : "Connect to mint"}
+                    </button>
+                    <button
+                      className="rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      onClick={shareToFarcaster}
+                      disabled={!mintedStory}
+                    >
+                      Share to Farcaster
+                    </button>
+                    {txUrl && (
+                      <a
+                        href={txUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-full border border-white/10 bg-white/5 px-4 py-3 text-xs text-emerald-200 underline-offset-4 hover:underline"
+                      >
+                        View on explorer
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                      <span className="text-[11px] uppercase tracking-[0.2em] text-cyan-200">
+                        Farcaster message
+                      </span>
+                      <div className="flex gap-2">
                       <button
-                        className={`rounded-full border px-3 py-1 transition ${
+                        className={`rounded-full border px-3 py-1 text-xs transition ${
                           shareMode === "mint"
                             ? "border-white bg-white/10 text-white"
                             : "border-white/20 bg-white/5 text-slate-200"
                         }`}
                         onClick={() => setShareMode("mint")}
-                        disabled={!mintedStory}
                       >
-                        Mint text
+                        Default share
                       </button>
-                      <button
-                        className={`rounded-full border px-3 py-1 transition ${
+                        <button
+                        className={`rounded-full border px-3 py-1 text-xs transition ${
                           shareMode === "story"
                             ? "border-white bg-white/10 text-white"
                             : "border-white/20 bg-white/5 text-slate-200"
-                        }`}
-                        onClick={() => setShareMode("story")}
-                        disabled={!insights}
+                          }`}
+                          onClick={() => setShareMode("story")}
+                        >
+                          Story stats
+                        </button>
+                      </div>
+                      <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-slate-200 whitespace-pre-line">
+                        {sharePreview}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                      <span className="text-[11px] uppercase tracking-[0.2em] text-cyan-200">
+                        Storybook image
+                      </span>
+                      <select
+                        className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none"
+                        value={shareImage ?? ""}
+                        onChange={(e) => setShareImage(e.target.value || null)}
                       >
-                        Story stats
-                      </button>
+                        <option value="">No image</option>
+                        {storySlides
+                          .filter((s) => s.image && s.id !== "mint")
+                          .map((s) => (
+                            <option key={s.id} value={s.image}>
+                              {s.eyebrow}
+                            </option>
+                          ))}
+                      </select>
+                      <p className="text-xs text-slate-200">Attach one storybook image embed in your message.</p>
                     </div>
                   </div>
-                  <button
-                    className="rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-                    onClick={shareToFarcaster}
-                    disabled={!mintedStory}
-                  >
-                    Share to Farcaster
-                  </button>
-                  {txUrl && (
-                    <a
-                      href={txUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-full border border-white/10 bg-white/5 px-4 py-3 text-xs text-emerald-200 underline-offset-4 hover:underline"
-                    >
-                      View on explorer
-                    </a>
-                  )}
-                </>
+                </div>
               )}
               {storySlides[currentSlide]?.cta !== "mint" && (
                 <button
