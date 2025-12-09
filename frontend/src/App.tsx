@@ -126,10 +126,14 @@ export default function App() {
 
   const shareToFarcaster = () => {
     const appUrl = "https://farcaster.xyz/miniapps/8idfqZvCXlsG/arbitrum-unwrapped";
+    const imageUrl = "https://arbitrum-unwrapped.onrender.com/unwrapped.png";
     const text = mintedStory
-      ? `Minted my Arbitrum Unwrapped 2025 story: ${mintedStory}\n${appUrl}`
+      ? `Minted my Arbitrum Unwrapped 2025 story\n\n${appUrl}`
       : `Arbitrum Unwrapped 2025 is live. Generate your year onchain + mint it.\n${appUrl}`;
-    sdk.actions.composeCast({ text });
+    sdk.actions.composeCast({
+      text,
+      embeds: [imageUrl, appUrl],
+    });
   };
 
   const truncatedAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
