@@ -28,6 +28,7 @@ export default function App() {
   const [mintedTokenId, setMintedTokenId] = useState<string | null>(null);
   const [mintError, setMintError] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [shareMode, setShareMode] = useState<"mint" | "story">("mint");
 
   useEffect(() => {
     sdk.actions.ready();
@@ -126,10 +127,23 @@ export default function App() {
 
   const shareToFarcaster = () => {
     const appUrl = "https://farcaster.xyz/miniapps/8idfqZvCXlsG/arbitrum-unwrapped";
-    const imageUrl = "https://arbitrum-unwrapped.onrender.com/unwrapped.png";
-    const text = mintedStory
-      ? `Minted my Arbitrum Unwrapped 2025 story. ✨\n\nGenerate your year onchain + mint it. 🎊\n\n${appUrl}`
-      : `Arbitrum Unwrapped 2025 is live. Generate your year onchain + mint it.\n${appUrl}`;
+    const defaultMintText = mintedStory
+      ? `Minted my Arbitrum Unwrapped 2025 story. ✨\n\n${mintedStory}\n\n${appUrl}`
+      : `Arbitrum Unwrapped 2025 is live. Generate your year onchain + mint it.\n\n${appUrl}`;
+
+    const storyText =
+      insights && shareMode === "story"
+        ? [
+            "Arbitrum Unwrapped 2025 highlights:",
+            `${insights.totalTransactions} txs · ${insights.totalVolumeEth.toFixed(2)} ETH moved`,
+            `Biggest day: ${insights.biggestDay.label} (${insights.biggestDay.txs} txs)`,
+            `${insights.nftsMinted} NFTs minted · Bridges: ${insights.bridgeCount} · Streak: ${insights.gmStreak} days`,
+            `First touch: ${insights.firstTouch}`,
+          ].join("\n")
+        : defaultMintText;
+
+    const text = `${shareMode === "story" ? storyText : defaultMintText}\n\n${appUrl}`;
+
     sdk.actions.composeCast({
       text,
       embeds: [],
@@ -347,6 +361,33 @@ export default function App() {
                           : "Generate and mint"
                       : "Connect to mint"}
                   </button>
+                  <div className="flex flex-wrap gap-2 text-xs text-slate-200">
+                    <span className="text-[11px] uppercase tracking-[0.2em] text-cyan-200">Share style</span>
+                    <div className="flex gap-2">
+                      <button
+                        className={`rounded-full border px-3 py-1 transition ${
+                          shareMode === "mint"
+                            ? "border-white bg-white/10 text-white"
+                            : "border-white/20 bg-white/5 text-slate-200"
+                        }`}
+                        onClick={() => setShareMode("mint")}
+                        disabled={!mintedStory}
+                      >
+                        Mint text
+                      </button>
+                      <button
+                        className={`rounded-full border px-3 py-1 transition ${
+                          shareMode === "story"
+                            ? "border-white bg-white/10 text-white"
+                            : "border-white/20 bg-white/5 text-slate-200"
+                        }`}
+                        onClick={() => setShareMode("story")}
+                        disabled={!insights}
+                      >
+                        Story stats
+                      </button>
+                    </div>
+                  </div>
                   <button
                     className="rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                     onClick={shareToFarcaster}
