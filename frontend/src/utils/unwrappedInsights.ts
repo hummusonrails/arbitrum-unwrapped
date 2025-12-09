@@ -8,13 +8,6 @@ export type Insights = {
   gmStreak: number;
   firstTouch: string;
   mintStory: string;
-  tokenHabits: {
-    topVolumeSymbol: string;
-    topVolumeAmount: number;
-    topCountSymbol: string;
-    topCountTransfers: number;
-    stablePreference: string;
-  };
   ethJourney: {
     start: number;
     end: number;
@@ -68,7 +61,6 @@ export async function fetchInsights(address: string): Promise<Insights> {
     "bridgeCount",
     "gmStreak",
     "firstTouch",
-    "tokenHabits",
     "ethJourney",
     "nftSnapshot",
     "streaks",
@@ -109,7 +101,6 @@ export async function fetchInsights(address: string): Promise<Insights> {
     gmStreak: Number(data.gmStreak),
     firstTouch: String(data.firstTouch),
     mintStory: String(mintStory),
-    tokenHabits: data.tokenHabits,
     ethJourney: data.ethJourney,
     nftSnapshot: data.nftSnapshot,
     streaks: data.streaks,

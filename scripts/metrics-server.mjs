@@ -9,7 +9,6 @@ const PORT = process.env.PORT || 3001;
 const BASE = "https://arbitrum.blockscout.com/api/v2";
 const MAX_TX_PAGES = 10;
 const MAX_TRANSFER_PAGES = 10;
-const MAX_ERC20_PAGES = 8;
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url || "", `http://${req.headers.host}`);
@@ -25,14 +24,13 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
-    const [txs2025, transfers2025, erc20Transfers, ethHistory, nftCollections] = await Promise.all([
+    const [txs2025, transfers2025, ethHistory, nftCollections] = await Promise.all([
       fetchAddressTransactions(address),
       fetchAddressTokenTransfers(address),
-      fetchAddressErc20Transfers(address),
       fetchAddressEthHistory(address),
       fetchAddressNftCollections(address),
     ]);
-    const metrics = buildInsights(address, txs2025, transfers2025, erc20Transfers, ethHistory, nftCollections);
+    const metrics = buildInsights(address, txs2025, transfers2025, ethHistory, nftCollections);
     send(res, 200, metrics);
   } catch (err) {
     console.error("Error building insights:", err);
@@ -131,44 +129,6 @@ async function fetchAddressTokenTransfers(address) {
   return collected;
 }
 
-// Fetch ERC-20 transfers for token habit stats.
-async function fetchAddressErc20Transfers(address) {
-  const collected = [];
-  let pageParams = {};
-  for (let page = 0; page < MAX_ERC20_PAGES; page += 1) {
-    const params = new URLSearchParams({
-      type: "ERC-20",
-      ...pageParams,
-    });
-    const url = `${BASE}/addresses/${address}/token-transfers?${params.toString()}`;
-    const resp = await fetch(url);
-    if (!resp.ok) {
-      const text = await resp.text();
-      throw new Error(`Blockscout ERC20 transfer request failed (${resp.status}): ${text.slice(0, 200)}`);
-    }
-    const json = await resp.json();
-    const items = json?.items || [];
-
-    let hitPre2025 = false;
-    for (const tr of items) {
-      const ts = tr?.timestamp;
-      if (!ts) continue;
-      const year = new Date(ts).getUTCFullYear();
-      if (year === 2025) {
-        collected.push(tr);
-      } else if (year < 2025) {
-        hitPre2025 = true;
-        break;
-      }
-    }
-
-    const next = json?.next_page_params;
-    if (!next || hitPre2025) break;
-    pageParams = sanitizePageParams(next);
-  }
-  return collected;
-}
-
 // ETH balance history by day for 2025.
 async function fetchAddressEthHistory(address) {
   const url = `${BASE}/addresses/${address}/coin-balance-history-by-day`;
@@ -197,7 +157,6 @@ function buildInsights(
   address,
   txs2025,
   transfers2025,
-  erc20Transfers,
   ethHistory,
   nftCollections,
 ) {
@@ -261,7 +220,6 @@ function buildInsights(
     `Biggest day: ${biggestDay.label}`,
   ].join(" · ");
 
-  const tokenHabits = summarizeTokenHabits(erc20Transfers);
   const ethJourney = summarizeEthJourney(ethHistory);
   const nftSnapshot = summarizeNftCollections(nftCollections);
   const streaks = summarizeStreaks(txs2025);
@@ -277,7 +235,6 @@ function buildInsights(
     gmStreak,
     firstTouch,
     mintStory,
-    tokenHabits,
     ethJourney,
     nftSnapshot,
     streaks,
@@ -349,44 +306,6 @@ function pickReadableDestination(tx) {
   // Prefer descriptive names over short, all-caps symbols (e.g., "USDC").
   const descriptive = candidates.find((c) => !/^[A-Z0-9]{2,8}$/.test(String(c)));
   return (descriptive || candidates[0] || "Unknown").toString();
-}
-
-function summarizeTokenHabits(transfers) {
-  const stableSymbols = new Set(["usdc", "usdc.e", "usdt", "dai", "usde", "frax", "lusd", "gusd", "busd"]);
-  const byToken = new Map();
-  for (const tr of transfers) {
-    const token = tr?.token || {};
-    const decimals = Number(token.decimals ?? 18);
-    const symbol = (token.symbol || token.address_hash || "Unknown").toString();
-    const addr = token.address_hash || symbol;
-    const valueRaw = Number(tr?.total?.value || "0");
-    const value = valueRaw / 10 ** (Number.isFinite(decimals) ? decimals : 18);
-    const key = addr.toLowerCase();
-    const bucket = byToken.get(key) || { symbol, addr, sent: 0, received: 0, count: 0 };
-    if (tr?.from?.hash?.toLowerCase?.() === tr?.to?.hash?.toLowerCase?.()) {
-      bucket.count += 1;
-    } else if (tr?.from?.hash?.toLowerCase?.() === tr?.address_hash?.toLowerCase?.()) {
-      bucket.sent += value;
-      bucket.count += 1;
-    } else if (tr?.to?.hash?.toLowerCase?.() === tr?.address_hash?.toLowerCase?.()) {
-      bucket.received += value;
-      bucket.count += 1;
-    } else {
-      bucket.count += 1;
-    }
-    byToken.set(key, bucket);
-  }
-  const tokens = [...byToken.values()];
-  const topByVolume = tokens.sort((a, b) => b.sent + b.received - (a.sent + a.received))[0];
-  const topByCount = tokens.sort((a, b) => b.count - a.count)[0];
-  const stablePick = tokens.find((t) => stableSymbols.has(t.symbol.toLowerCase()));
-  return {
-    topVolumeSymbol: topByVolume?.symbol || "Unknown",
-    topVolumeAmount: Number(((topByVolume?.sent || 0) + (topByVolume?.received || 0)).toFixed(4)),
-    topCountSymbol: topByCount?.symbol || "Unknown",
-    topCountTransfers: topByCount?.count || 0,
-    stablePreference: stablePick ? stablePick.symbol : "None",
-  };
 }
 
 function summarizeEthJourney(history) {

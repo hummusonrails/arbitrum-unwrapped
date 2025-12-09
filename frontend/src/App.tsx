@@ -201,13 +201,6 @@ export default function App() {
           image: "/bridges.png",
         },
         {
-          id: "token-habits",
-          eyebrow: "Token Habits",
-          title: `${insights.tokenHabits.topVolumeSymbol} led your flows`,
-          body: `${insights.tokenHabits.topVolumeAmount.toFixed(2)} total moved · ${insights.tokenHabits.topCountTransfers} transfers · Stable of choice: ${insights.tokenHabits.stablePreference}`,
-          image: "/token_habits.png",
-        },
-        {
           id: "eth-journey",
           eyebrow: "ETH Journey",
           title: `Peak: ${insights.ethJourney.peak} ETH`,

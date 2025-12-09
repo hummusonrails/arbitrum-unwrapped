@@ -2,17 +2,17 @@
   "frame": {
     "name": "Arbitrum Unwrapped",
     "version": "1",
-    "iconUrl": "https://holiday-fortune-cookie.onrender.com/unwrapped_icon.png",
-    "homeUrl": "https://holiday-fortune-cookie.onrender.com",
-    "imageUrl": "https://holiday-fortune-cookie.onrender.com/screenshot.png",
+    "iconUrl": "https://arbitrum-unwrapped.onrender.com/unwrapped_icon.png",
+    "homeUrl": "https://arbitrum-unwrapped.onrender.com",
+    "imageUrl": "https://arbitrum-unwrapped.onrender.com/screenshot.png",
     "buttonTitle": "Mint Your Fortune",
-    "splashImageUrl": "https://holiday-fortune-cookie.onrender.com/splashImage.png",
+    "splashImageUrl": "https://arbitrum-unwrapped.onrender.com/splashImage.png",
     "splashBackgroundColor": "#194fb5",
-    "webhookUrl": "https://holiday-fortune-cookie.onrender.com/api/webhook",
+    "webhookUrl": "https://arbitrum-unwrapped.onrender.com/api/webhook",
     "subtitle": "Mint your fortune",
-    "description": "Discover your Arbitrum year onchain + mint it.",
+    "description": "Discover your Arbitrum year onchain and mint it.",
     "primaryCategory": "entertainment",
-    "heroImageUrl": "https://holiday-fortune-cookie.onrender.com/screenshot.png",
+    "heroImageUrl": "https://arbitrum-unwrapped.onrender.com/screenshot.png",
     "tags": [
       "arbitrum",
       "nft",
@@ -21,12 +21,12 @@
     ],
     "tagline": "Mint your Arbitrum year.",
     "ogTitle": "Arbitrum Unwrapped",
-    "ogDescription": "Discover your Arbitrum year onchain + mint it.",
-    "ogImageUrl": "https://holiday-fortune-cookie.onrender.com/splashImage.png"
+    "ogDescription": "Discover your Arbitrum year onchain and mint it.",
+    "ogImageUrl": "https://arbitrum-unwrapped.onrender.com/splashImage.png"
   },
   "accountAssociation": {
     "header": "eyJmaWQiOjMyMzc5NywidHlwZSI6ImF1dGgiLCJrZXkiOiIweGI5YzM3NThDYUU0RTIxQzk1N2QyMzkxNEI5OTQwNjNCZkU3OTlkNGIifQ",
-    "payload": "eyJkb21haW4iOiJob2xpZGF5LWZvcnR1bmUtY29va2llLm9ucmVuZGVyLmNvbSJ9",
-    "signature": "NvnodoztzUsJVELqG3MFDpWZTzSDPtZu6tqb5K5T2mlsiqOoiJDfar/N6WiCS7S7yr/+/7JaXZBbgEZhSBxA6Bw="
+    "payload": "eyJkb21haW4iOiJhcmJpdHJ1bS11bndyYXBwZWQub25yZW5kZXIuY29tIn0",
+    "signature": "R2CAm2DNOVzFep0nn71it5mO+J5nYstg2523XBCUOb8hAhlLzteliDhYLTPo0qr+bFCnylhfrdLYAfvhjQoFOhs="
   }
 }
