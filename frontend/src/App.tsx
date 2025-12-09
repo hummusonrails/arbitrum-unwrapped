@@ -462,13 +462,6 @@ export default function App() {
                           />
                         </div>
                       )}
-                      {shareImageId && storySlides.find((s) => s.id === shareImageId)?.shareUrl && (
-                        <div className="mt-2 flex items-center justify-center rounded-lg border border-white/10 bg-black/20 px-2 py-2">
-                          <span className="text-[11px] text-emerald-200">
-                            Embed URL: {storySlides.find((s) => s.id === shareImageId)?.shareUrl}
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
