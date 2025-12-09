@@ -8,6 +8,7 @@ import { type Insights, fetchInsights } from "./utils/unwrappedInsights";
 
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS as `0x${string}`;
 const MINT_PRICE_WEI = 15000000000000n; // ~0.000015 ETH (~$0.05)
+const APP_URL = "https://farcaster.xyz/miniapps/8idfqZvCXlsG/arbitrum-unwrapped";
 
 export default function App() {
   const { isConnected, address } = useAccount();
@@ -29,7 +30,6 @@ export default function App() {
   const [mintError, setMintError] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [shareMode, setShareMode] = useState<"mint" | "story">("mint");
-  const [shareImageId, setShareImageId] = useState<string | null>(null);
 
   useEffect(() => {
     sdk.actions.ready();
@@ -127,9 +127,8 @@ export default function App() {
   }, [isMintSuccess, receipt, pendingStory, insights]);
 
   const buildShareText = () => {
-    const appUrl = "https://farcaster.xyz/miniapps/8idfqZvCXlsG/arbitrum-unwrapped";
     const defaultMintText = mintedStory
-      ? `Minted my Arbitrum Unwrapped 2025 story. ✨\n\n${mintedStory}`
+      ? `Minted my Arbitrum Unwrapped 2025 story. ✨\n\n`
       : `Arbitrum Unwrapped 2025 is live. Generate your year onchain + mint it.`;
 
     const storyText =
@@ -143,20 +142,15 @@ export default function App() {
           ].join("\n")
         : defaultMintText;
 
-    return `${shareMode === "story" ? storyText : defaultMintText}\n\n${appUrl}`;
+    return `${shareMode === "story" ? storyText : defaultMintText}\n\n${APP_URL}`;
   };
 
   const shareToFarcaster = () => {
     const text = buildShareText();
-    const selectedSlide = shareImageId ? storySlides.find((s) => s.id === shareImageId) : null;
-    const imageEmbed =
-      selectedSlide?.shareUrl && typeof window !== "undefined"
-        ? new URL(selectedSlide.shareUrl, window.location.origin).toString()
-        : null;
 
     sdk.actions.composeCast({
       text,
-      embeds: imageEmbed ? [imageEmbed] : [],
+      embeds: [APP_URL],
     });
   };
   const sharePreview = buildShareText();
@@ -186,7 +180,6 @@ export default function App() {
       body: string;
       cta?: "connect" | "mint";
       image?: string;
-      shareUrl?: string;
     }[] = [
       {
         id: "intro",
@@ -197,7 +190,6 @@ export default function App() {
           : "Tap to begin and flip through your onchain story. Connect to load your personal stats.",
         cta: isConnected ? undefined : "connect",
         image: "/unwrapped.png",
-        shareUrl: "/share/intro.html",
       },
     ];
 
@@ -209,7 +201,6 @@ export default function App() {
           title: `${insights.totalVolumeEth.toFixed(2)} ETH moved`,
           body: `${insights.totalTransactions} transactions across Arbitrum One in 2025.`,
           image: "/eth_moved.png",
-          shareUrl: "/share/flow.html",
         },
         {
           id: "biggest",
@@ -217,7 +208,6 @@ export default function App() {
           title: insights.biggestDay.label,
           body: `${insights.biggestDay.txs} txs · ${insights.biggestDay.minutes} minutes onchain.`,
           image: "/biggest_day.png",
-          shareUrl: "/share/biggest.html",
         },
         {
           id: "collector",
@@ -225,7 +215,6 @@ export default function App() {
           title: `${insights.nftsMinted} NFTs minted`,
           body: `Top collection: ${insights.topCollection}`,
           image: "/nfts_minted.png",
-          shareUrl: "/share/collector.html",
         },
         {
           id: "bridge",
@@ -233,7 +222,6 @@ export default function App() {
           title: `${insights.bridgeCount} bridges · ${insights.gmStreak}-day streak`,
           body: `First Arbitrum touch: ${insights.firstTouch}`,
           image: "/bridges.png",
-          shareUrl: "/share/bridge.html",
         },
         {
           id: "eth-journey",
@@ -241,7 +229,6 @@ export default function App() {
           title: `Peak: ${insights.ethJourney.peak} ETH`,
           body: `Started ${insights.ethJourney.start} → Ended ${insights.ethJourney.end} (${insights.ethJourney.changePercent}% change) · Biggest swing ${insights.ethJourney.biggestSwing} ETH`,
           image: "/eth_peak.png",
-          shareUrl: "/share/eth-journey.html",
         },
         {
           id: "nft-holdings",
@@ -249,7 +236,6 @@ export default function App() {
           title: `${insights.nftSnapshot.collectionsHeld} collections held`,
           body: `Oldest badge year: ${insights.nftSnapshot.oldestEventYear} · Event city: ${insights.nftSnapshot.eventCity} · Event/POAPs: ${insights.nftSnapshot.eventBadgeCount}`,
           image: "/nft_shelf.png",
-          shareUrl: "/share/nft-holdings.html",
         },
         {
           id: "streaks",
@@ -257,7 +243,6 @@ export default function App() {
           title: `Longest streak: ${insights.streaks.longestConsecutiveDays} days`,
           body: `Most active hours: ${insights.streaks.dominantHourBucket} UTC`,
           image: "/longest_streak.png",
-          shareUrl: "/share/streaks.html",
         },
         {
           id: "diversity",
@@ -265,7 +250,6 @@ export default function App() {
           title: `${insights.dappDiversity.uniqueDapps} apps touched`,
           body: `Top category: ${insights.dappDiversity.topCategory}`,
           image: "/apps_touched.png",
-          shareUrl: "/share/diversity.html",
         },
       );
     }
@@ -402,12 +386,11 @@ export default function App() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                      <span className="text-[11px] uppercase tracking-[0.2em] text-cyan-200">
-                        Farcaster message
-                      </span>
-                      <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <span className="text-[11px] uppercase tracking-[0.2em] text-cyan-200">
+                      Farcaster message
+                    </span>
+                    <div className="flex gap-2">
                       <button
                         className={`rounded-full border px-3 py-1 text-xs transition ${
                           shareMode === "mint"
@@ -418,50 +401,19 @@ export default function App() {
                       >
                         Default share
                       </button>
-                        <button
+                      <button
                         className={`rounded-full border px-3 py-1 text-xs transition ${
                           shareMode === "story"
                             ? "border-white bg-white/10 text-white"
                             : "border-white/20 bg-white/5 text-slate-200"
-                          }`}
-                          onClick={() => setShareMode("story")}
-                        >
-                          Story stats
-                        </button>
-                      </div>
-                      <div className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-slate-200 whitespace-pre-wrap break-words">
-                        {sharePreview}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                      <span className="text-[11px] uppercase tracking-[0.2em] text-cyan-200">
-                        Storybook image
-                      </span>
-                      <select
-                        className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none"
-                        value={shareImageId ?? ""}
-                        onChange={(e) => setShareImageId(e.target.value || null)}
+                        }`}
+                        onClick={() => setShareMode("story")}
                       >
-                        <option value="">No image</option>
-                        {storySlides
-                          .filter((s) => s.image && s.id !== "mint")
-                          .map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.eyebrow}
-                            </option>
-                          ))}
-                      </select>
-                      <p className="text-xs text-slate-200">Attach one storybook image embed in your message.</p>
-                      {shareImageId && (
-                        <div className="mt-2 flex items-center justify-center rounded-lg border border-white/10 bg-black/20 px-2 py-2">
-                          <img
-                            src={storySlides.find((s) => s.id === shareImageId)?.image || ""}
-                            alt="Selected storybook preview"
-                            className="h-16 w-16 rounded-md object-cover"
-                          />
-                        </div>
-                      )}
+                        Story stats
+                      </button>
+                    </div>
+                    <div className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-slate-200 whitespace-pre-wrap break-words">
+                      {sharePreview}
                     </div>
                   </div>
                 </div>
