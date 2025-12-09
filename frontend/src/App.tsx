@@ -29,7 +29,7 @@ export default function App() {
   const [mintError, setMintError] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [shareMode, setShareMode] = useState<"mint" | "story">("mint");
-  const [shareImage, setShareImage] = useState<string | null>(null);
+  const [shareImageId, setShareImageId] = useState<string | null>(null);
 
   useEffect(() => {
     sdk.actions.ready();
@@ -148,9 +148,10 @@ export default function App() {
 
   const shareToFarcaster = () => {
     const text = buildShareText();
+    const selectedSlide = shareImageId ? storySlides.find((s) => s.id === shareImageId) : null;
     const imageEmbed =
-      shareImage && typeof window !== "undefined"
-        ? new URL(shareImage, window.location.origin).toString()
+      selectedSlide?.shareUrl && typeof window !== "undefined"
+        ? new URL(selectedSlide.shareUrl, window.location.origin).toString()
         : null;
 
     sdk.actions.composeCast({
@@ -185,6 +186,7 @@ export default function App() {
       body: string;
       cta?: "connect" | "mint";
       image?: string;
+      shareUrl?: string;
     }[] = [
       {
         id: "intro",
@@ -195,6 +197,7 @@ export default function App() {
           : "Tap to begin and flip through your onchain story. Connect to load your personal stats.",
         cta: isConnected ? undefined : "connect",
         image: "/unwrapped.png",
+        shareUrl: "/share/intro.html",
       },
     ];
 
@@ -206,6 +209,7 @@ export default function App() {
           title: `${insights.totalVolumeEth.toFixed(2)} ETH moved`,
           body: `${insights.totalTransactions} transactions across Arbitrum One in 2025.`,
           image: "/eth_moved.png",
+          shareUrl: "/share/flow.html",
         },
         {
           id: "biggest",
@@ -213,6 +217,7 @@ export default function App() {
           title: insights.biggestDay.label,
           body: `${insights.biggestDay.txs} txs · ${insights.biggestDay.minutes} minutes onchain.`,
           image: "/biggest_day.png",
+          shareUrl: "/share/biggest.html",
         },
         {
           id: "collector",
@@ -220,6 +225,7 @@ export default function App() {
           title: `${insights.nftsMinted} NFTs minted`,
           body: `Top collection: ${insights.topCollection}`,
           image: "/nfts_minted.png",
+          shareUrl: "/share/collector.html",
         },
         {
           id: "bridge",
@@ -227,6 +233,7 @@ export default function App() {
           title: `${insights.bridgeCount} bridges · ${insights.gmStreak}-day streak`,
           body: `First Arbitrum touch: ${insights.firstTouch}`,
           image: "/bridges.png",
+          shareUrl: "/share/bridge.html",
         },
         {
           id: "eth-journey",
@@ -234,6 +241,7 @@ export default function App() {
           title: `Peak: ${insights.ethJourney.peak} ETH`,
           body: `Started ${insights.ethJourney.start} → Ended ${insights.ethJourney.end} (${insights.ethJourney.changePercent}% change) · Biggest swing ${insights.ethJourney.biggestSwing} ETH`,
           image: "/eth_peak.png",
+          shareUrl: "/share/eth-journey.html",
         },
         {
           id: "nft-holdings",
@@ -241,6 +249,7 @@ export default function App() {
           title: `${insights.nftSnapshot.collectionsHeld} collections held`,
           body: `Oldest badge year: ${insights.nftSnapshot.oldestEventYear} · Event city: ${insights.nftSnapshot.eventCity} · Event/POAPs: ${insights.nftSnapshot.eventBadgeCount}`,
           image: "/nft_shelf.png",
+          shareUrl: "/share/nft-holdings.html",
         },
         {
           id: "streaks",
@@ -248,6 +257,7 @@ export default function App() {
           title: `Longest streak: ${insights.streaks.longestConsecutiveDays} days`,
           body: `Most active hours: ${insights.streaks.dominantHourBucket} UTC`,
           image: "/longest_streak.png",
+          shareUrl: "/share/streaks.html",
         },
         {
           id: "diversity",
@@ -255,6 +265,7 @@ export default function App() {
           title: `${insights.dappDiversity.uniqueDapps} apps touched`,
           body: `Top category: ${insights.dappDiversity.topCategory}`,
           image: "/apps_touched.png",
+          shareUrl: "/share/diversity.html",
         },
       );
     }
@@ -429,26 +440,33 @@ export default function App() {
                       </span>
                       <select
                         className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none"
-                        value={shareImage ?? ""}
-                        onChange={(e) => setShareImage(e.target.value || null)}
+                        value={shareImageId ?? ""}
+                        onChange={(e) => setShareImageId(e.target.value || null)}
                       >
                         <option value="">No image</option>
                         {storySlides
                           .filter((s) => s.image && s.id !== "mint")
                           .map((s) => (
-                            <option key={s.id} value={s.image}>
+                            <option key={s.id} value={s.id}>
                               {s.eyebrow}
                             </option>
                           ))}
                       </select>
                       <p className="text-xs text-slate-200">Attach one storybook image embed in your message.</p>
-                      {shareImage && (
+                      {shareImageId && (
                         <div className="mt-2 flex items-center justify-center rounded-lg border border-white/10 bg-black/20 px-2 py-2">
                           <img
-                            src={shareImage}
+                            src={storySlides.find((s) => s.id === shareImageId)?.image || ""}
                             alt="Selected storybook preview"
                             className="h-16 w-16 rounded-md object-cover"
                           />
+                        </div>
+                      )}
+                      {shareImageId && storySlides.find((s) => s.id === shareImageId)?.shareUrl && (
+                        <div className="mt-2 flex items-center justify-center rounded-lg border border-white/10 bg-black/20 px-2 py-2">
+                          <span className="text-[11px] text-emerald-200">
+                            Embed URL: {storySlides.find((s) => s.id === shareImageId)?.shareUrl}
+                          </span>
                         </div>
                       )}
                     </div>
